@@ -52,11 +52,18 @@
 			<version>1.1.2</version>
 		</dependency>
 
-		<!-- JsonProvider Impl-->
+		<!-- JSON-B -->
 		<dependency>
 			<groupId>org.apache.johnzon</groupId>
 			<artifactId>johnzon-jsonb</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>yasson</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<!-- JSON-P-->
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
