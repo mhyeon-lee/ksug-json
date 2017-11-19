@@ -10,6 +10,7 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
+import javax.json.spi.JsonProvider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,13 +28,15 @@ import com.jayway.jsonpath.PathNotFoundException;
 @DisplayName("Json Merge Patch Test")
 class JsonMergePatchTest {
 	private Jsonb jsonb;
-	private Project object;
-	private JsonObject target;
+	private JsonProvider jsonProvider;
 
-	@SuppressWarnings("unchecked")
+	private Project object;
+
 	@BeforeEach
 	void setUp() {
 		this.jsonb = JsonbBuilder.create();
+		// johnzon 은 createObjectBuilder 에서 nested map 을 parsing 할 수 없음
+		this.jsonProvider = new org.glassfish.json.JsonProviderImpl();
 		this.object = Project.builder()
 				.name("merge-patch")
 				.description("json merge patch")
@@ -42,52 +45,46 @@ class JsonMergePatchTest {
 						.age(30)
 						.build())
 				.build();
-
-		String json = this.jsonb.toJson(this.object);
-		Map<String, Object> map = this.jsonb.fromJson(json, Map.class);
-		// johnzon 은 createObjectBuilder 에서 nested map 을 parsing 할 수 없음
-		this.target = new org.glassfish.json.JsonProviderImpl()
-				.createObjectBuilder(map)
-				.build();
 	}
 
 	@Test
 	void jsonMergePatch() {
 		// Given
-		String patchName = "patched";
-		JsonObject patch = Json.createObjectBuilder()
-				.add("name", patchName)
-				.addNull("policy")
-				.add("creator", Json.createObjectBuilder()
-						.addNull("name")
-						.build())
-				.build();
-		JsonMergePatch sut = Json.createMergePatch(patch);
+		JsonObject target = this.objectToJsonObject(this.object);
+
+		String mergePatchJson = "{\"name\":\"patched\", \"policy\":null, \"creator\":{\"name\":null}}";
+		JsonObject mergePatch = this.jsonToJsonObject(mergePatchJson);
+		JsonMergePatch sut = Json.createMergePatch(mergePatch);
 
 		// When
-		JsonValue result = sut.apply(this.target);
+		JsonValue result = sut.apply(target);
 		String expected = result.asJsonObject().toString();
 
 		// Then
 		System.out.println(expected);
 		DocumentContext document = JsonPath.parse(expected);
-		assertAll("assertion for merge patch result.",
-				() -> assertEquals(patchName, document.read("$.name", String.class)),
-				() -> assertEquals(this.object.getDescription(), document.read("$.description", String.class)),
-				() -> assertThrows(PathNotFoundException.class, () -> document.read("$.policy")),
-				() -> assertThrows(PathNotFoundException.class, () -> document.read("$.creator.name")),
-				() -> assertSame(
-						this.object.getCreator().getAge(),
-						document.read("$.creator.age", Integer.class)));
+		assertEquals("patched", document.read("$.name", String.class));
+		assertEquals(this.object.getDescription(), document.read("$.description", String.class));
+		assertThrows(PathNotFoundException.class, () -> document.read("$.policy"));
+		assertThrows(PathNotFoundException.class, () -> document.read("$.creator.name"));
+		assertSame(this.object.getCreator().getAge(), document.read("$.creator.age", Integer.class));
 
 		Project project = this.jsonb.fromJson(expected, Project.class);
-		assertAll("assertion deserialized object for merge patch result.",
-				() -> assertEquals(patchName, project.getName()),
-				() -> assertEquals(this.object.getDescription(), project.getDescription()),
-				() -> assertNull(project.getPolicy()),
-				() -> assertNull(project.getCreator().getName()),
-				() -> assertSame(
-						this.object.getCreator().getAge(),
-						project.getCreator().getAge()));
+		assertEquals("patched", project.getName());
+		assertEquals(this.object.getDescription(), project.getDescription());
+		assertNull(project.getPolicy());
+		assertNull(project.getCreator().getName());
+		assertSame(this.object.getCreator().getAge(), project.getCreator().getAge());
+	}
+
+	private JsonObject objectToJsonObject(Project object) {
+		String json = this.jsonb.toJson(object);
+		return this.jsonToJsonObject(json);
+	}
+
+	@SuppressWarnings("unchecked")
+	private JsonObject jsonToJsonObject(String json) {
+		Map<String, Object> map = this.jsonb.fromJson(json, Map.class);
+		return this.jsonProvider.createObjectBuilder(map).build();
 	}
 }
