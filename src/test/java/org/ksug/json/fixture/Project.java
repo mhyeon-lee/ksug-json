@@ -1,6 +1,9 @@
 package org.ksug.json.fixture;
 
 import java.beans.ConstructorProperties;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -15,15 +18,17 @@ public class Project {
 	private String name;
 	private String description;
 	private String policy;
+	private List<String> tags;
 	private User creator;
 
 	@Builder
-	@ConstructorProperties({"name", "description", "policy", "creator"})
-	public Project(String name, String description, String openPolicy, User creator) {
-		this.name = name;
-		this.description = description;
-		this.policy = policy;
-		this.creator = creator;
+	@ConstructorProperties({"name", "description", "policy", "tags", "creator"})
+	public Project(String name, String description, String policy, List<String> tags, User creator) {
+		this.setName(name);
+		this.setDescription(description);
+		this.setPolicy(policy);
+		this.setTags(tags);
+		this.setCreator(creator);
 	}
 
 	public String getName() {
@@ -40,5 +45,17 @@ public class Project {
 
 	public String getPolicy() {
 		return this.policy;
+	}
+
+	public List<String> getTags() {
+		return Collections.unmodifiableList(this.tags);
+	}
+
+	public void setTags(List<String> tags) {
+		if (tags == null || tags.isEmpty()) {
+			this.tags = Collections.emptyList();
+		} else{
+			this.tags = new ArrayList<>(tags);
+		}
 	}
 }
