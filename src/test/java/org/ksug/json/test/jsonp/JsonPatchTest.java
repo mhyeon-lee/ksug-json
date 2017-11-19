@@ -50,6 +50,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for add operation.")
 	void jsonPatch_add() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -86,6 +87,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for remove operation.")
 	void jsonPatch_remove() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -127,6 +129,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for replace operation.")
 	void jsonPatch_replace() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -165,6 +168,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for copy operation.")
 	void jsonPatch_copy() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -200,6 +204,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for move operation.")
 	void jsonPatch_move() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -235,6 +240,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for test operation.")
 	void jsonPatch_test() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
@@ -274,6 +280,7 @@ class JsonPatchTest {
 	}
 
 	@Test
+	@DisplayName("Json Patch test for test operation fail then throws exception.")
 	void jsonPatch_test_fail() {
 		// Given
 		JsonObject source = this.objectToJsonObject(this.object);
