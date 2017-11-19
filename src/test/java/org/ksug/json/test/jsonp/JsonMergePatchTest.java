@@ -12,7 +12,6 @@ import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
-import javax.json.spi.JsonProvider;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,15 +29,12 @@ import com.jayway.jsonpath.PathNotFoundException;
 @DisplayName("Json Merge Patch Test")
 class JsonMergePatchTest {
 	private Jsonb jsonb;
-	private JsonProvider jsonProvider;
 
 	private Project object;
 
 	@BeforeEach
 	void setUp() {
 		this.jsonb = JsonbBuilder.create();
-		// johnzon 은 createObjectBuilder 에서 nested map 을 parsing 할 수 없음
-		this.jsonProvider = new org.glassfish.json.JsonProviderImpl();
 		this.object = Project.builder()
 				.name("json-merge-patch")
 				.description("json merge patch")
@@ -122,6 +118,6 @@ class JsonMergePatchTest {
 	@SuppressWarnings("unchecked")
 	private JsonObject jsonToJsonObject(String json) {
 		Map<String, Object> map = this.jsonb.fromJson(json, Map.class);
-		return this.jsonProvider.createObjectBuilder(map).build();
+		return Json.createObjectBuilder(map).build();
 	}
 }

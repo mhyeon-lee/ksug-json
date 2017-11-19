@@ -23,6 +23,6 @@ class JsonProviderTest {
 	@DisplayName("The object declared in META-INF is chosen as the implementation of JsonProvider.")
 	void jsonProviderTest() {
 		JsonProvider jsonProvider = JsonProvider.provider();
-		assertSame(org.apache.johnzon.core.JsonProviderImpl.class, jsonProvider.getClass());
+		assertSame(org.glassfish.json.JsonProviderImpl.class, jsonProvider.getClass());
 	}
 }
