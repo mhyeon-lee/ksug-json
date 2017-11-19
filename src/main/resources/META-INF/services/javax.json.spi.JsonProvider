@@ -1,0 +1,4 @@
+org.apache.johnzon.core.JsonProviderImpl
+# com.owlike.genson.ext.jsr353.GensonJsonProvider
+# org.glassfish.json.JsonProviderImpl
+# com.github.pgelinas.jackson.javax.json.spi.JacksonProvider - not supported jsonb

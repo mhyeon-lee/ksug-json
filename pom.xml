@@ -41,22 +41,6 @@
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
 		</dependency>
-
-		<dependency>
-			<groupId>com.github.pgelinas</groupId>
-			<artifactId>jackson-javax-json</artifactId>
-			<version>0.9.0</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.johnzon</groupId>
-			<artifactId>johnzon-jsonb</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.owlike</groupId>
-			<artifactId>genson</artifactId>
-			<version>1.4</version>
-		</dependency>
-
 		<dependency>
 			<groupId>javax.json.bind</groupId>
 			<artifactId>javax.json.bind-api</artifactId>
@@ -67,10 +51,21 @@
 			<artifactId>javax.json-api</artifactId>
 			<version>1.1.2</version>
 		</dependency>
+
+		<!-- JsonProvider Impl-->
 		<dependency>
-			<groupId>org.projectlombok</groupId>
-			<artifactId>lombok</artifactId>
-			<version>1.16.18</version>
+			<groupId>org.apache.johnzon</groupId>
+			<artifactId>johnzon-jsonb</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.1.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.owlike</groupId>
+			<artifactId>genson</artifactId>
+			<version>1.4</version>
 		</dependency>
 
 		<dependency>
@@ -78,7 +73,17 @@
 			<artifactId>jackson-datatype-jsr353</artifactId>
 			<version>2.9.0</version>
 		</dependency>
+		<dependency>
+			<groupId>com.github.pgelinas</groupId>
+			<artifactId>jackson-javax-json</artifactId>
+			<version>0.9.0</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.16.18</version>
+		</dependency>
 
 		<dependency>
 			<groupId>com.h2database</groupId>
