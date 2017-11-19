@@ -2,6 +2,7 @@ package org.ksug.json.fixture;
 
 import java.beans.ConstructorProperties;
 
+import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -20,6 +21,7 @@ public class User {
 	private String name;
 	private int age;
 
+	@Builder
 	@ConstructorProperties({"name", "age"})
 	public User(String name, int age) {
 		this.name = name;
