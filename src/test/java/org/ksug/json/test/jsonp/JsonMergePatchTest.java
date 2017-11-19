@@ -39,18 +39,16 @@ class JsonMergePatchTest {
 		this.jsonb = JsonbBuilder.create();
 		// johnzon 은 createObjectBuilder 에서 nested map 을 parsing 할 수 없음
 		this.jsonProvider = new org.glassfish.json.JsonProviderImpl();
-
-		Project project = Project.builder()
+		this.object = Project.builder()
 				.name("json-merge-patch")
 				.description("json merge patch")
 				.policy("public")
+				.tags(Collections.singletonList("json-tags"))
 				.creator(User.builder()
 						.name("user")
 						.age(30)
 						.build())
 				.build();
-		project.setTags(Collections.singletonList("json-tags"));
-		this.object = project;
 	}
 
 	@Test
