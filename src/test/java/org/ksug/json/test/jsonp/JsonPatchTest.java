@@ -1,11 +1,11 @@
 package org.ksug.json.test.jsonp;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.ksug.json.test.JsonUtils.*;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -53,9 +53,10 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for add operation.")
 	void jsonPatch_add() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject addPatch = this.jsonToJsonObject("{\"op\":\"add\", \"path\":\"/tags/-\", \"value\":\"appended\"}");
+		JsonObject addPatch = jsonToJsonObject(this.jsonb,
+				"{\"op\":\"add\", \"path\":\"/tags/-\", \"value\":\"appended\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(addPatch)
 				.build();
@@ -90,13 +91,13 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for remove operation.")
 	void jsonPatch_remove() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject removePatch = this.jsonToJsonObject(
+		JsonObject removePatch = jsonToJsonObject(this.jsonb,
 				"{\"op\":\"remove\", \"path\":\"/description\"}");
-		JsonObject arrayRemovePatch = this.jsonToJsonObject(
+		JsonObject arrayRemovePatch = jsonToJsonObject(this.jsonb,
 				"{\"op\":\"remove\", \"path\":\"/tags/0\"}");
-		JsonObject nestedRemovePatch = this.jsonToJsonObject(
+		JsonObject nestedRemovePatch = jsonToJsonObject(this.jsonb,
 				"{\"op\":\"remove\", \"path\":\"/creator/name\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(removePatch)
@@ -132,11 +133,13 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for replace operation.")
 	void jsonPatch_replace() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject replacePatch = this.jsonToJsonObject(
+		JsonObject replacePatch = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"replace\", \"path\":\"/description\", \"value\":\"desc patched\"}");
-		JsonObject nestedReplacePatch = this.jsonToJsonObject(
+		JsonObject nestedReplacePatch = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"replace\", \"path\":\"/creator/age\", \"value\":40}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(replacePatch)
@@ -171,9 +174,10 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for copy operation.")
 	void jsonPatch_copy() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject copyPath = this.jsonToJsonObject(
+		JsonObject copyPath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"copy\", \"from\":\"/name\", \"path\":\"/creator/name\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(copyPath)
@@ -207,9 +211,10 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for move operation.")
 	void jsonPatch_move() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject movePath = this.jsonToJsonObject(
+		JsonObject movePath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"move\", \"from\":\"/tags/0\", \"path\":\"/description\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(movePath)
@@ -243,11 +248,13 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for test operation.")
 	void jsonPatch_test() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject testPath = this.jsonToJsonObject(
+		JsonObject testPath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"test\", \"path\":\"/name\", \"value\":\"json-patch\"}");
-		JsonObject addPath = this.jsonToJsonObject(
+		JsonObject addPath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"add\", \"path\":\"/tags/1\", \"value\":\"second tag\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(testPath)
@@ -283,11 +290,13 @@ class JsonPatchTest {
 	@DisplayName("Json Patch test for test operation fail then throws exception.")
 	void jsonPatch_test_fail() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		JsonObject testPath = this.jsonToJsonObject(
+		JsonObject testPath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"test\", \"path\":\"/name\", \"value\":\"json-patch-fail\"}");
-		JsonObject addPath = this.jsonToJsonObject(
+		JsonObject addPath = jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"add\", \"path\":\"/tags/1\", \"value\":\"second tag\"}");
 		JsonArray patchArray = Json.createArrayBuilder()
 				.add(testPath)
@@ -311,7 +320,7 @@ class JsonPatchTest {
 	@Test
 	void diff() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 		Project targetObject = Project.builder()
 				.name("diff-target")
 				.description(null)
@@ -319,7 +328,7 @@ class JsonPatchTest {
 				.tags(Arrays.asList("tag1", "tag2"))
 				.creator(this.object.getCreator())
 				.build();
-		JsonObject target = this.objectToJsonObject(targetObject);
+		JsonObject target = objectToJsonObject(this.jsonb, targetObject);
 
 		// When
 		JsonPatch expected = Json.createDiff(source, target);
@@ -328,28 +337,21 @@ class JsonPatchTest {
 		System.out.println(expected.toString());
 		JsonArray jsonArray = expected.toJsonArray();
 		assertTrue(jsonArray.size() == 4);
-		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+		assertTrue(jsonArray.contains(jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"replace\",\"path\":\"/name\",\"value\":\"diff-target\"}")));
-		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+		assertTrue(jsonArray.contains(jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"remove\",\"path\":\"/description\"}")));
-		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+		assertTrue(jsonArray.contains(jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"replace\",\"path\":\"/tags/0\",\"value\":\"tag2\"}")));
-		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+		assertTrue(jsonArray.contains(jsonToJsonObject(
+				this.jsonb,
 				"{\"op\":\"add\",\"path\":\"/tags/0\",\"value\":\"tag1\"}")));
 
 		JsonObject patched = expected.apply(source);
 		Project patchedObject = this.jsonb.fromJson(patched.toString(), Project.class);
 		assertEquals(targetObject, patchedObject);
-	}
-
-	private JsonObject objectToJsonObject(Project object) {
-		String json = this.jsonb.toJson(object);
-		return this.jsonToJsonObject(json);
-	}
-
-	@SuppressWarnings("unchecked")
-	private JsonObject jsonToJsonObject(String json) {
-		Map<String, Object> map = this.jsonb.fromJson(json, Map.class);
-		return Json.createObjectBuilder(map).build();
 	}
 }

@@ -1,10 +1,10 @@
 package org.ksug.json.test.jsonp;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.ksug.json.test.JsonUtils.*;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.json.Json;
 import javax.json.JsonMergePatch;
@@ -50,10 +50,11 @@ class JsonMergePatchTest {
 	@Test
 	void jsonMergePatch() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 
-		String mergePatchJson = "{\"name\":\"patched\", \"policy\":null, \"creator\":{\"name\":null}}";
-		JsonObject mergePatch = this.jsonToJsonObject(mergePatchJson);
+		JsonObject mergePatch = jsonToJsonObject(
+				this.jsonb,
+				"{\"name\":\"patched\", \"policy\":null, \"creator\":{\"name\":null}}");
 		JsonMergePatch sut = Json.createMergePatch(mergePatch);
 
 		// When
@@ -82,9 +83,11 @@ class JsonMergePatchTest {
 	@Test
 	void diff() {
 		// Given
-		JsonObject source = this.objectToJsonObject(this.object);
+		JsonObject source = objectToJsonObject(this.jsonb, this.object);
 		String targetJson = "{\"name\":\"target\", \"policy\":\"private\", \"creator\":{\"age\":40}}";
-		JsonObject target = this.jsonToJsonObject(targetJson);
+		JsonObject target = jsonToJsonObject(
+				this.jsonb,
+				"{\"name\":\"target\", \"policy\":\"private\", \"creator\":{\"age\":40}}");
 
 		// When
 		JsonMergePatch expected = Json.createMergeDiff(source, target);
@@ -110,16 +113,5 @@ class JsonMergePatchTest {
 		assertEquals(Collections.emptyList(), project.getTags());
 		assertNull(project.getCreator().getName());
 		assertSame(40, project.getCreator().getAge());
-	}
-
-	private JsonObject objectToJsonObject(Project object) {
-		String json = this.jsonb.toJson(object);
-		return this.jsonToJsonObject(json);
-	}
-
-	@SuppressWarnings("unchecked")
-	private JsonObject jsonToJsonObject(String json) {
-		Map<String, Object> map = this.jsonb.fromJson(json, Map.class);
-		return Json.createObjectBuilder(map).build();
 	}
 }
