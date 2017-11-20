@@ -101,7 +101,9 @@ class JsonMergePatchTest {
 		assertNull(document.read("$.creator.name"));
 		assertEquals(40, document.read("$.creator.age", Integer.class).intValue());
 
-		Project project = this.jsonb.fromJson(resultJson, Project.class);
+		JsonValue patched = expected.apply(source);
+		Project project = this.jsonb.fromJson(patched.toString(), Project.class);
+
 		assertEquals("target", project.getName());
 		assertNull(project.getDescription());
 		assertEquals("private", project.getPolicy());
