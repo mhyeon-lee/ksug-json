@@ -3,6 +3,7 @@ package org.ksug.json.fixture;
 import java.beans.ConstructorProperties;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -17,6 +18,7 @@ import lombok.Setter;
  */
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class User {
 	private String name;
 	private int age;

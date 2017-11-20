@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -14,6 +15,7 @@ import lombok.Setter;
  */
 @Setter
 @NoArgsConstructor
+@EqualsAndHashCode
 public class Project {
 	private String name;
 	private String description;
@@ -48,6 +50,9 @@ public class Project {
 	}
 
 	public List<String> getTags() {
+		if (this.tags == null || this.tags.isEmpty()) {
+			return Collections.emptyList();
+		}
 		return Collections.unmodifiableList(this.tags);
 	}
 

@@ -124,7 +124,7 @@ class JsonPatchTest {
 		assertNull(project.getDescription());
 		assertEquals(this.object.getPolicy(), project.getPolicy());
 		assertEquals(Collections.emptyList(), project.getTags());
-		assertNull( project.getCreator().getName());
+		assertNull(project.getCreator().getName());
 		assertSame(this.object.getCreator().getAge(), project.getCreator().getAge());
 	}
 
@@ -306,6 +306,40 @@ class JsonPatchTest {
 		// Then
 		assertNotNull(expected);
 		assertTrue(expected.getMessage().contains("\'/name\'"));
+	}
+
+	@Test
+	void diff() {
+		// Given
+		JsonObject source = this.objectToJsonObject(this.object);
+		Project targetObject = Project.builder()
+				.name("diff-target")
+				.description(null)
+				.policy(this.object.getPolicy())
+				.tags(Arrays.asList("tag1", "tag2"))
+				.creator(this.object.getCreator())
+				.build();
+		JsonObject target = this.objectToJsonObject(targetObject);
+
+		// When
+		JsonPatch expected = Json.createDiff(source, target);
+
+		// Then
+		System.out.println(expected.toString());
+		JsonArray jsonArray = expected.toJsonArray();
+		assertTrue(jsonArray.size() == 4);
+		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+				"{\"op\":\"replace\",\"path\":\"/name\",\"value\":\"diff-target\"}")));
+		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+				"{\"op\":\"remove\",\"path\":\"/description\"}")));
+		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+				"{\"op\":\"replace\",\"path\":\"/tags/0\",\"value\":\"tag2\"}")));
+		assertTrue(jsonArray.contains(this.jsonToJsonObject(
+				"{\"op\":\"add\",\"path\":\"/tags/0\",\"value\":\"tag1\"}")));
+
+		JsonObject patched = expected.apply(source);
+		Project patchedObject = this.jsonb.fromJson(patched.toString(), Project.class);
+		assertEquals(targetObject, patchedObject);
 	}
 
 	private JsonObject objectToJsonObject(Project object) {
