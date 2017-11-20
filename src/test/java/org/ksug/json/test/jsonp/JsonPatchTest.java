@@ -40,7 +40,7 @@ class JsonPatchTest {
 		this.object = Project.builder()
 				.name("json-patch")
 				.description("json patch")
-				.policy("open")
+				.policy("public")
 				.tags(Collections.singletonList("json-tags"))
 				.creator(User.builder()
 						.name("user")

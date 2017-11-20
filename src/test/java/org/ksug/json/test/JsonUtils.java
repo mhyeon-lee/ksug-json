@@ -6,13 +6,11 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.bind.Jsonb;
 
-import org.ksug.json.fixture.Project;
-
 /**
  * Created by mhyeon.lee on 2017. 11. 20..
  */
 public class JsonUtils {
-	public static JsonObject objectToJsonObject(Jsonb jsonb, Project object) {
+	public static JsonObject objectToJsonObject(Jsonb jsonb, Object object) {
 		String json = jsonb.toJson(object);
 		return jsonToJsonObject(jsonb, json);
 	}

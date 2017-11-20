@@ -36,7 +36,7 @@ class JsonPointerTest {
 		this.object = Project.builder()
 				.name("json-pointer")
 				.description("json pointer")
-				.policy("open")
+				.policy("public")
 				.tags(Collections.singletonList("json-tags"))
 				.creator(User.builder()
 						.name("user")
