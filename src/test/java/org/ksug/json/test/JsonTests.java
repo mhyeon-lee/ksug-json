@@ -38,10 +38,6 @@ class JsonTests {
 		this.jackson = new ObjectMapper();
 		this.gson = new Gson();
 		this.genson = new Genson();
-		new GensonBuilder()
-				.useRuntimeType(true)
-				.useConstructorWithArguments(true)
-				.create();
 
 		this.object = new User("user", 30);
 		this.json = "{\"name\" : \"user\", \"age\" : 30 }";
