@@ -13,11 +13,11 @@ import org.junit.jupiter.api.Test;
 import org.ksug.json.fixture.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.google.gson.Gson;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.owlike.genson.Genson;
-import com.owlike.genson.GensonBuilder;
 
 /**
  * Created by mhyeon.lee on 2017. 11. 19..
@@ -35,7 +35,7 @@ class JsonTests {
 	@BeforeEach
 	void setUp() {
 		this.jsonb = JsonbBuilder.create();
-		this.jackson = new ObjectMapper();
+		this.jackson = new ObjectMapper().registerModule(new Jdk8Module());
 		this.gson = new Gson();
 		this.genson = new Genson();
 
