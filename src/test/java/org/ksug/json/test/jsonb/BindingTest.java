@@ -15,6 +15,7 @@ import org.ksug.json.fixture.Post;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.gson.Gson;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
@@ -33,7 +34,8 @@ public class BindingTest {
 	@BeforeEach
 	void setUp() {
 		this.jsonb = JsonbBuilder.create();
-		this.jackson = new ObjectMapper().registerModule(new Jdk8Module());
+		this.jackson = new ObjectMapper()
+				.registerModules(new Jdk8Module(), new JavaTimeModule());
 		this.gson = new Gson();
 		this.genson = new Genson();
 	}
