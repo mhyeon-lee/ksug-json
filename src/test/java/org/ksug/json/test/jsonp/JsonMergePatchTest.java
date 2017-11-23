@@ -84,7 +84,6 @@ class JsonMergePatchTest {
 	void diff() {
 		// Given
 		JsonObject source = objectToJsonObject(this.jsonb, this.object);
-		String targetJson = "{\"name\":\"target\", \"policy\":\"private\", \"creator\":{\"age\":40}}";
 		JsonObject target = jsonToJsonObject(
 				this.jsonb,
 				"{\"name\":\"target\", \"policy\":\"private\", \"creator\":{\"age\":40}}");
