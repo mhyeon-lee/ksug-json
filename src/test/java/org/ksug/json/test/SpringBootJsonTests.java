@@ -10,14 +10,12 @@ import org.junit.runner.RunWith;
 import org.ksug.json.fixture.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.JsonTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.GsonTester;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.json.JsonContent;
 import org.springframework.boot.test.json.JsonbTester;
 import org.springframework.boot.test.json.ObjectContent;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 
 /**
  * Created by mhyeon.lee on 2017. 11. 8..
