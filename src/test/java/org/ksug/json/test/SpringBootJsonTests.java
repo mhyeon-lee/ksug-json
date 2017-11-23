@@ -23,8 +23,6 @@ import org.springframework.test.context.web.WebAppConfiguration;
  * Created by mhyeon.lee on 2017. 11. 8..
  */
 @RunWith(SpringRunner.class)
-@SpringBootTest
-@WebAppConfiguration
 @JsonTest
 public class SpringBootJsonTests {
 	@Autowired
@@ -46,13 +44,16 @@ public class SpringBootJsonTests {
 	@Test
 	public void jasonbSerialize() throws IOException {
 		JsonContent<User> expected = this.jsonb.write(this.object);
-		assertJson(expected);
+		assertThat(expected).extractingJsonPathStringValue("@.name").isEqualTo(this.object.getName());
+		assertThat(expected).extractingJsonPathNumberValue("@.age").isSameAs(this.object.getAge());
 	}
 
 	@Test
 	public void jasonbDeserialize() throws IOException {
 		ObjectContent<User> expected = this.jsonb.parse(this.json);
-		assertObject(expected);
+		User user = expected.getObject();
+		assertThat(user.getName()).isEqualTo(this.object.getName());
+		assertThat(user.getAge()).isEqualTo(this.object.getAge());
 	}
 
 	@Test
