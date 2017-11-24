@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Introduce JSON-B, JSON-P, JPA 2.2 Specification</title>
+    <meta charset="utf-8">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+        @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+        @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+        body { font-family: 'Droid Serif'; }
+        h1, h2, h3 {
+            font-family: 'Yanone Kaffeesatz';
+            font-weight: normal;
+            margin-top: 15px !important;
+            margin-bottom: 15px !important;
+        }
+        .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; background: #E8E7E7}
+        img {
+            max-width: 800px;
+            max-height: 500px;
+        }
+        span:not(code span) { margin: 10px;}
+        li {margin: 13px;}
+    </style>
+</head>
+<body>
+<textarea id="source">
+
+class: center, middle
+
+## Introduce
+#JSON-B, JSON-P, JPA 2.2
+##Specification
+<br/><br/><br/>
+
+.right[이명현 (Naver Corp)]
+.right[https://github.com/mhyeon-lee/ksug-json]
+
+---
+
+class: middle
+
+1. [JSR-367] JavaTM API for JSON Binding(JSON-B)
+
+2. [JSR-374] JavaTM API for JSON Processing(JSON-P)
+
+3. [JSR-338] JPA 2.2
+
+---
+
+class: middle
+
+### JSON new Specifications
+
+<br/>
+
+#### JSON-B
+  - Java API for `JSON Binding`
+  - JSR-367 Specification
+  - javax.json.bind-api 1.0 (2017.07.07)
+  - http://json-b.net/
+
+<br/>
+
+#### JSON-P
+  - Java API for `JSON Processing`
+  - JSR-374 Specification
+  - javax.json-api 1.1 (2017.05.24)
+  - https://javaee.github.io/jsonp/
+
+---
+
+class: center, middle
+
+#### JSON Binding 과 Processing 을 이해하기 위한
+##  Serialize, Deserialize 개념 원리
+
+#### 가장 많이 사용하는 Jackson 을 기준으로 알아보자.
+
+---
+
+class: middle
+
+## ObjectMapper
+
+  - Jackson Mapping Component
+
+---
+
+class: middle
+
+## jackson-databind
+
+- SerializerProvider
+    * `JsonSerializer`를 관리하고 실행한다.
+- DeserializationContext
+    * `JsonDeserializer`를 관리하고 실행한다.
+
+<br/>
+
+- JsonSerializer
+    * Object를 `JsonGenerator`를 사용하여 serialize 한다.
+- JsonDeseriazlier
+    * String(Json)을 `JsonParser`를 사용하여 Object 로 Deserialize 한다.
+
+---
+
+class: middle
+
+## jackson-core (streaming)
+
+- JsonFactory
+    * `JsonGenerator`, `JsonParser` 를 생성한다.
+
+<br/>
+
+- JsonGenerator
+    * `Writer(OutputStream)`에 Object 를 Json 형식으로 generate 한다.
+    * key, value 를 `{"key" : "value"}` 포맷으로 쓴다.
+- JsonParser
+    * `Reader(InputStream)`로 부터 Json 형식의 key, value 를 parsing 한다.
+    * String(Json) 에서 `"key", "value"` 를 읽는다.
+
+---
+
+class: center
+
+### Jackson Serialize
+
+![jackson-serialize](./imgs/jackson-serialize.jpg)
+
+---
+
+class: center
+
+#### `ObjectMapper`에게 변환하고자 하는 Object를 넘긴다.
+
+![jackson-serialize](./imgs/jackson-serialize2.jpg)
+
+---
+
+class: center
+
+#### `JsonFactory`는 `JsonGenerator`를 생성한다.
+
+![jackson-serialize](./imgs/jackson-serialize3.jpg)
+
+---
+
+class: center
+
+#### `SerializerProvider`는 적절한 `JsonSerializer`를 찾는다.
+
+![jackson-serialize](./imgs/jackson-serialize4.jpg)
+
+---
+
+class: center
+
+#### `JsonSerializer`는 `JsonGenerator`를 사용해서 Object를 JSON 으로 변환한다.
+
+![jackson-serialize](./imgs/jackson-serialize5.jpg)
+
+---
+
+class: center
+
+#### `ObjectMapper`는 JSON 문자열을 반환한다.
+
+![jackson-serialize](./imgs/jackson-serialize6.jpg)
+
+---
+
+class: middle
+
+#### `ObjectMapper`는
+#### `JsonSerializer`로 generate 대상 및 방식을 결정하고,  `(data-bind)`
+#### `JsonGenerator`로 write를 수행한다.   `(streaming)`
+
+<br/>
+
+![jackson-serialize-databind-streaming](./imgs/jackson-serialize-binding-streaming.jpg)
+
+---
+
+class: center
+
+### Jackson Deserialize
+
+![jackson-deserialize](./imgs/jackson-deserialize.jpg)
+
+---
+
+class: center
+
+#### `ObjectMapper`에게 JSON과 변환하고자 하는 Object Type을 넘긴다.
+
+![jackson-deserialize](./imgs/jackson-deserialize2.jpg)
+
+---
+
+class: center
+
+#### `JsonFactory`는 `JsonParser`를 생성한다.
+
+![jackson-deserialize](./imgs/jackson-deserialize3.jpg)
+
+---
+
+class: center
+
+#### `DeserializerContext`는 적절한 `JsonDeserializer`를 찾는다.
+
+![jackson-deserialize](./imgs/jackson-deserialize4.jpg)
+
+---
+
+class: center
+
+#### `JsonDeSerializer`는 Object를 생성하고, `JsonParser`를 사용해 Parsing 결과를 셋팅한다.
+
+![jackson-deserialize](./imgs/jackson-deserialize5.jpg)
+
+---
+
+class: center
+
+#### `ObjectMapper`는 Object를 반환한다.
+
+![jackson-deserialize](./imgs/jackson-deserialize6.jpg)
+
+---
+
+class: middle
+
+#### `ObjectMapper`는
+#### `JsonDeserializer`로 parsing 대상 및 방식을 결정하고,  `(data-bind)`
+#### `JsonParser`로 read를 수행한다.  `(streaming)`
+
+<br/>
+
+![jackson-deserialize-databind-streaming](./imgs/jackson-deserialize-databind-streaming.jpg)
+
+---
+
+class: middle
+
+### JSON Spec 으로 변경합니다.
+
+<br/>
+
+#### jackson-databind -> JSON-B
+
+#### jackson-core(streaming) -> JSON-P
+
+---
+
+class: middle
+
+## JSON-B
+
+<br/>
+
+### Jsonb, JsonbProvider  (javax.json.bind)
+
+- ~~ObjectMapper~~
+- Jsonb
+
+``` java
+// ObjectMapper objectMapper = new ObjectMapper();
+JsonbProvider provider = JsonbProvider.provider();
+Jsonb jsonb = provider.create().build();
+
+// serialize
+
+// String json = objectMapper.writeValueAsString(obj);
+String json = jsonb.toJson(obj);
+
+// deserialize
+
+// Object obj = objectMapper.readValue(json, type);
+Object obj = jsonb.fromJson(json, type);
+
+```
+
+---
+
+class: middle
+
+### SerializationContext (javax.json.bind.serializer)
+
+- ~~SerializerProvider~~
+- SerializationContext
+
+``` java
+// DefaultSerializerProvider provider = ...;
+// provider.defaultSerializeValue(obj, generator);
+
+SerializationContext serContext = ...;
+serContext.serialize(generator, obj);
+```
+
+<br/>
+
+
+### JsonbSerializer
+
+- ~~JsonSerializer~~
+- JsonbSerializer
+
+``` java
+// JsonSerializer ser = ...;
+// ser.serialize(obj, generator, provider);
+
+JsonbSerializer ser = ...;
+ser.serialize(obj, generator, serContext);
+```
+---
+
+class: middle
+
+### DeserializationContext (javax.json.bind.serializer)
+
+- ~~com.fasterxml.jackson.databind.DeserializationContext~~
+- javax.json.bind.serializer.DeserializationContext
+
+``` java
+// com.fasterxml.jackson.databind.DeserializationContext desrContext = ...;
+// desrContext.readValue(parser, type);
+
+javax.json.bind.serializer.DeserializationContext desrContext = ...;
+desrContext.deserialize(type, parser);
+```
+
+<br/>
+
+### JsonbDeserializer
+
+- ~~JsonDeserializer~~
+- JsonbDeserializer
+
+``` java
+// JsonDeserializer desr = ...;
+// desr.deserialize(parser, desrContext);
+
+JsonbDeserializer desr = ...;
+desr.deserialize(parser, desrContext, type);
+```
+
+---
+
+class: middle
+
+## JSON-P
+
+<br/>
+
+### JsonProvider  (javax.json.spi)
+
+- ~~JsonFactory~~
+- JsonProvider
+
+``` java
+// JsonFactory jsonFactory = new MappingJsonFactory();
+JsonProvider provider = JsonProvider.provider();
+
+// generator
+
+// JsonGenerator generator = jsonFactory.createGenerator(writer);
+JsonGenerator generator = provider.createGenerator(writer);
+JsonGeneratorFactory generatorFactory = provider.createGeneratorFactory(config);
+
+// parser
+
+// JsonParser parser = jsonFactory.createParser(reader);
+JsonParser parser = provider.createParser(reader);
+JsonParserFactory parserFactory = provider.createParserFactory(config);
+```
+---
+
+class: middle
+
+### JsonGenerator (javax.json.stream)
+
+- ~~com.fasterxml.jackson.core.JsonGenerator~~
+- javax.json.stream.JsonGenerator
+
+``` java
+// com.fasterxml.jackson.core.JsonGenerator generator =
+//                                jsonFactory.createGenerator(writer);
+// generator.writeStringField(key, value);
+
+javax.json.stream.JsonGenerator generator = provider.createGenerator(writer);
+generator.write(key, value);
+```
+
+<br/>
+
+### JsonParser (javax.json.stream)
+
+- ~~com.fasterxml.jackson.core.JsonParser~~
+- javax.json.stream.JsonParser
+
+``` java
+// com.fasterxml.jackson.core.JsonParser parser =
+//                                jsonFactory.createParser(reader);
+// String key = parser.getCurrentName();
+// String value = parser.getValueAsString();
+
+javax.json.stream.JsonParser parser = provider.createGenerator(writer);
+String value = parser.getString();
+```
+
+---
+
+class: center
+
+### JSON-B, JSON-P serialize
+
+![jsr-serialize](./imgs/jsr-serialize.jpg)
+
+
+---
+
+class: center
+
+### JSON-B, JSON-P deserialize
+
+![jsr-deserialize](./imgs/jsr-deserialize.jpg)
+
+
+---
+
+class: center, middle
+
+![json-b](./imgs/json-b.jpg)
+
+## JSON-B Specification
+
+#### comarison with other frameworks
+#### (Jackson, Gson, Genson)
+
+
+---
+
+class: center, middle
+
+## JSON-B Default Mapping
+
+---
+
+class: middle
+
+### Default Mapping - Optional  (jackson with Jdk8Module)
+
+<br/>
+
+- Optional.of("content")
+
+  * JSON-B : "content"
+  * Jackson : "content"
+  * Gson : "content"
+  * Genson : {"present":true}
+
+<br/>
+
+- Optional.empty()
+
+  * JSON-B : -
+  * jackson : null
+  * gson : -
+  * genson : {"present":false}
+
+---
+
+class: middle
+
+### Default Mapping - Date
+
+<br/>
+
+- new Date();
+
+  * JSON-B : "2017-11-22T13:31:48.501"
+  * Jackson : 1511357508501
+  * Gson : "Nov 22, 2017 10:31:48 PM"
+  * Genson : 1511357508501
+
+<br/>
+
+- ZonedDateTime.now()  (jackson with JavaTimeModule)
+
+  * JSON-B : "2017-11-22T22:35:55.569+09:00[Asia/Seoul]"
+  * jackson : 1511357755.569000000
+  * gson : {"dateTime":{"date":{"year":2017,"month":11, ...}}
+  * genson : {"chronology":{},"dayOfMonth":22, ...}
+---
+
+class: middle
+
+### Default Mapping - Classes
+
+<br/>
+
+- `public`, `protected` 접근자의 nested class, static nested class 지원 (MUST)
+- `Anonymous` 클래스는 serialization 만 지원한다
+- deserialization 시 `public` 또는 `protected` 접근자의 no-argument 생성자가 존재해야 한다
+- Enum 은 serialize 시 `name()` 을 사용하고, deserialize 시 `valueOf(String str)` 을 사용한다.
+- interface, abstract 같은 다형성을 요구하는 타입은 deserialization이 지원되지 않는다
+    (Collections, Number 는 지원)
+
+
+---
+
+class: middle
+
+### Default Mapping - Fields
+
+<br/>
+
+- `final` 필드 serialize 지원 (MUST)
+- `final` 필드 deserialize 미지원 (MUST)
+- `static`, `transient` 필드 serialize / deserialize 미지원 (MUST)
+- serialize 시 `NULL` 값은 skip
+- deserialize 시 `NULL` 값은 null 셋팅 (단, Optional일 경우 empty() 셋팅)
+- deserialize 시 JSON 에 존재하지 않는 필드는 skip
+- serialize 시 속성 순서는 사전 순서 (단, 부모 클래스의 필드는 앞에 위치한다.)
+
+<br/>
+
+### Default Mapping - Scope
+
+- public getter / setter
+- public fields with no getter / setter
+- public field and no-public getter ignored
+---
+
+class: middle
+
+### Scope and Field Access Strategy
+
+<br/>
+
+- getters / setters 사용
+  * JSON-B, Jackson, Genson
+- public getter / setter 만 허용
+  * JSON-B
+- private field 사용
+  * Gson
+- Virtual fields 사용
+  * JSON-B, Jackson, Genson
+
+---
+
+class: center, middle
+
+## JSON-B Annotation
+
+---
+
+class: middle
+
+### Property Name
+
+- JSON-B : `@JsonbProperty` (FIELD, METHOD, PARAMETER)
+- Jackson : `@JsonProperty` (FIELD, METHOD, PARAMETER)
+- Gson : `@SerializedName` (FIELD, METHOD)
+- Genson : `@JsonProperty` (FIELD, METHOD, PARAMETER)
+
+<br/>
+
+### Property Order
+
+- JSON-B : `@JsonbPropertyOrder`  (LEXICOGRAPHICAL, ANY, REVERSE)
+- Jackson : `@JsonPropertyOrder`
+
+---
+
+class: middle
+
+### Ignore, Visibility
+
+- JSON-B
+
+    > `@JsonbTransient` (FIELD, METHOD)
+
+    > `@JsonbVisibility` (TYPE, PACKAGE)
+
+- Jackson
+
+    > `@JsonIgnore` (FIELD, METHOD, CONSTRUCTOR)
+
+    > `@JsonIgnoreProperties` (FIELD, METHOD, CONSTRUCTOR)
+
+    > `@JsonAutoDetect` (TYPE)
+
+- Gson
+
+    > `@Expose` (FIELD)
+
+- Genson
+
+    > `@JsonIgnore` (FIELD, METHOD, CONSTRUCTOR)
+
+---
+
+class: middle
+
+### Null Handling
+
+- JSON-B
+
+    > serializes null by default : No
+
+    > hanling annotation : `@JsonNillable`
+
+- Jackson
+
+    > serializes null by default : Yes
+
+    > hadling annotation : `@JsonInclude(Include.NON_NULL)`
+
+- Gson
+
+    > serializes null by default : No
+
+- Genson
+
+    > serializes null by default : Yes
+
+---
+
+class: middle
+
+### Etc
+
+
+- `@JsonbCreator`
+- `@JsonbDateFormat`
+- `@JsonbNumberFormat`
+- `@JsonbTypeAdapter`
+- `@JsonbTypeSerializer`
+- `@JsonbTypeDeserializer`
+
+---
+
+class: center, middle
+
+![json-p](./imgs/json-p.jpg)
+
+## JSON-P Specification
+
+---
+
+class: middle
+
+### JSR-353 (1.0)
+
+<br/>
+
+- JsonValue
+- JsonObject
+- JsonString
+- JsonNumber
+- JsonArray
+- JsonStructure
+
+<br/>
+
+- JsonObjectBuilder
+- JsonArrayBuilder
+
+<br/>
+
+- JsonWriter
+- JsonReader
+
+---
+
+class: middle
+
+### Reading/Writing JsonObject
+
+``` java
+// Create Json and print
+JsonObject json = Json.createObjectBuilder()
+     .add("name", "Falco")
+     .add("age", BigDecimal.valueOf(3))
+     .add("bitable", Boolean.FALSE).build();
+String result = json.toString();
+System.out.println(result);
+
+// output
+{"name":"Falco","age":3,"bitable":false}
+
+
+// Read back
+JsonReader jsonReader = Json.createReader(new StringReader(result));
+JsonObject jobj = jsonReader.readObject();
+System.out.println(jobj);
+
+// Output
+{"name":"Falco","age":3,"bitable":false}
+```
+---
+
+class: middle
+
+## What's new in JSON-P
+##### javax.json-api 1.0 (JSR-353) -> 1.1 (JSR-374)
+
+  - JsonPatch
+  - JsonPointer
+  - JsonMergePatch
+  - JsonCollectors
+
+---
+
+class: middle
+
+#### HTTP PATCH
+  - [RFC-5789](https://tools.ietf.org/html/rfc5789) (2010.03)
+  - Apply partial modifications to a resource
+
+#### JSON Pointer
+  - [RFC-6901](https://tools.ietf.org/html/rfc6901) (2013.04)
+
+#### JSON Patch
+  - [RFC-6902](https://tools.ietf.org/html/rfc7386) (2013.04)
+  - Content-Type: `application/json-patch+json`
+  - http://jsonpatch.com/
+
+#### JSON Merge Patch
+  - [RFC-7396](https://tools.ietf.org/html/rfc7386) (2014.10)
+  - Content-Type: `application/merge-patch+json`
+
+---
+
+class: middle
+
+### JSON Patch
+
+- The original document
+``` json
+{
+        "bibidi": "babidi",
+        "foo": "bar"
+}
+```
+
+- The patch
+``` json
+[
+        { "op": "add", "path": "/hello", "value": ["majin"] },
+        { "op": "replace", "path": "/bibidi", "value": "buu" },
+        { "op": "remove", "path": "/foo" }
+]
+```
+
+- The result
+``` json
+{
+        "bibidi": "buu",
+        "hello": ["majin"]
+}
+```
+
+---
+
+class: middle
+
+
+### JSON Patch : Operations
+
+
+<br/>
+
+* add: `value`를 `path` 위치에 추가하거나, 배열에 insert 수행
+
+* remove: `path` 위치의 값을 제거하거나, 배열에서 제거
+
+* replace: `path` 위치의 값을 `value` 로 교체
+
+* copy: `from` 위치의 값을 `path` 위치로 복사
+
+* move: `from` 위치의 값을 `path` 위치로 이동
+
+* test: `path` 위치의 값이 value 인지 테스트
+
+---
+
+class: middle
+
+### JsonPatch : JSON-P
+
+* < T extends JsonStructure > T apply(T target);
+
+``` java
+// String 의 문자열 "", escape 생략
+
+JsonArray patchArray = Json.createReader(new StringReader(
+        [{"op": "add", "path": "/tags/0", "value": "buu"},
+         {"op": "replace", "path": "/name", "value": "babidi"}]
+    ))
+    .readArray();
+
+JsonPatch jsonPatch = Json.createPatch(patchArray);
+
+
+JsonObject target = Json.createReader(new StringReader(
+          {"name": "bibidi", "description": "majin"}
+    ))
+    .readObject();
+
+
+JsonObject result = jsonPatch.apply(target);
+
+System.out.println(result.toString());
+
+{"name": "babidi", "description": "majin", "tags": ["buu"]}
+
+```
+
+---
+
+class: middle
+
+### JSON Pointer
+
+- JSON 문서 내의 특정 값을 식별하기 위한 문자열 형식
+- JSON Patch 에서 작업을 수행할 문서의 부분을 지정하는데 사용한다. (path)
+
+<br/>
+
+- JSON Pointer 는 string token 을 `/` 로 분리한다.
+- 빈 문자열은 JSON 문서의 `root` 를 가리킨다.
+- path `/` 는 root 를 가리키지 않으며, root 의 "" 키를 가리킨다.
+- key 의 `~` 또는 `/` 가 포함되어 있을때는, `~0`/ `~1` 를 사용한다.
+    > `{ "foo/bar~": "baz" }` -> `/foo~1bar~0`
+- `-` 는 배열의 마지막을 가리킨다.
+    > `/majins/-/name` :  "buu"
+
+``` json
+{
+  "majins": [
+      { "name": "bibidi" },
+      { "name": "babidi"},
+      { "name": "buu"}
+  ]
+}
+```
+---
+
+class: middle
+
+### JsonPointer : JSON-P
+
+* JsonValue getValue(JsonStructure target);
+
+``` java
+// String 의 문자열 "", escape 생략
+JsonObject target = Json.createReader(new StringReader(
+          {"name": "buu", "tags": ["majin"]}
+      ))
+      .readObject();
+
+JsonPointer pointer = Json.createPointer("/name");
+
+JsonValue result = pointer.getValue(target);
+
+System.out.println(result.toString());
+
+"buu"
+
+```
+
+---
+
+class: middle
+
+### JSON Merge Patch
+
+- The original document
+``` json
+{
+        "bibidi": "babidi",
+        "foo": "bar",
+        "satan": "angel"
+}
+```
+
+- The patch
+``` json
+{
+        "bibidi": "buu",
+        "satan": null,
+        "hello": ["majin"]
+}
+```
+
+- The result
+``` json
+{
+        "bibidi": "buu",
+        "foo": "bar",
+        "satan": null,
+        "hello": ["majin"]
+}
+```
+---
+
+class: middle
+
+### JsonMergePatch : JSON-P
+
+* JsonValue apply(JsonValue target);
+
+``` java
+// String 의 문자열 "", escape 생략
+
+JsonObject mergePatch = Json.createReader(new StringReader(
+        {"bibidi": "buu", "satan": null, "hello": ["majin"]}
+    ))
+    .readObject();
+
+JsonMergePatch jsonMergePatch = Json.createMergePatch(mergePatch);
+
+
+JsonObject target = Json.createReader(new StringReader(
+      {"bibidi": "babidi", "foo": "bar", "satan": "angel"}
+    ))
+    .readObject();
+
+
+JsonValue result = jsonMergePatch.apply(target);
+
+System.out.println(result.toString());
+
+{ "bibidi": "buu", "foo": "bar", "satan": null, "hello": ["majin"]}
+```
+---
+
+class: center, middle
+
+## 우리가 원하는 PATCH
+
+<br/>
+
+![want-patch](./imgs/want-patch.jpg)
+
+
+---
+
+class: center, middle
+
+## JSON-B, JSON-P 가 지원하는 PATCH
+
+<br/>
+
+![real-patch](./imgs/real-patch.jpg)
+
+---
+
+class: middle
+
+## JsonPatch, JsonMergePatch
+
+<br/>
+
+### Pros
+
+  - Resource 에 대한 부분 수정이 가능하므로, API 갯수를 줄일 수 있다.
+  - 부분 수정이 가능하면서, Version 충돌을 줄일 수 있다.
+  - JsonPatch 는 기존 표현하기 어려웠던 동사(op)를 표현할 수 있다.
+  - JsonMergePatch 는 이해하기 쉽고 Client 에서 간결하게 사용할 수 있다.
+
+<br/>
+
+### Cons
+
+  - API Provider 입장에서 구현이 쉽지 않음
+  - `JsonPatch` 는 client 입장에서 장황한 스펙
+  - `JsonMergePatch` 는 null 과 undefined 구분이 필요
+  - `JsonMergePatch` 는 nested 속성 patch 를 표현하기 어려운 한계
+  - Object의 serialize, deserialize 과정에 binding 설정에 따른 데이터 손실 및 의도하지 않은 변경이 발생할 수 있다.
+  - 도메인 객체 변경에 대한 도메인 로직이 개입하기 어렵다.
+
+---
+
+class: middle
+
+### JsonCollectors
+
+<br/>
+
+- JSON-P 에서는 JsonObject 에 대한 stream collector 구현체를 제공한다.
+
+<br/>
+
+- toJsonArray() : stream 을 `JsonArray` 로 collect 지원
+- toJsonObject() : stream 을 `JsonObject` 로 collect 지원
+- groupingBy() : stream 을 특정 key 에 대한 value 로 `grouping` 하는 collect 지원
+
+---
+
+class: middle
+
+### JsonCollectors.toJsonArray()
+
+<br/>
+
+``` java
+// String 의 문자열 "", escape 생략
+
+// Given
+List<String> jsons = Arrays.asList(
+	{"name":"project1","policy":"public","creator":{"name":"user1","age":30}},
+	{"name":"project2","policy":"private","creator":{"name":"user2","age":40}},
+	{"name":"project3","description":"desc","creator":{"name":"user3","age":50}});
+
+// When
+JsonArray expected = jsons.stream()
+        	.map(json -> Json.createReader(new StringReader(json)))
+            .map(JsonReader::readObject)
+        	.collect(JsonCollectors.toJsonArray());
+
+// Then
+assertEquals(jsons.get(0), expected.get(0).toString());
+assertEquals(jsons.get(1), expected.get(1).toString());
+assertEquals(jsons.get(2), expected.get(2).toString());
+```
+---
+
+class: middle
+
+### JsonCollectors.toJsonObject()
+
+<br/>
+
+``` java
+// Given
+Map<String, String> map = new HashMap<>();
+map.put("name", "project");
+map.put("description", "project desc");
+map.put("policy", "public");
+
+
+// When
+JsonObject expected = map.entrySet().stream()
+        .map(e -> new SimpleEntry<String, JsonValue>)(
+                e.getKey(), Json.createValue(e.getValue))))
+        .collect(JsonCollectors.toJsonObject());
+
+// Then
+assertEquals(map.get("name"), expected.getString("name"));
+assertEquals(map.get("description"), expected.getString("description"));
+assertEquals(map.get("policy"), expected.getString("policy"));
+```
+---
+
+class: middle
+
+### JsonCollectors.groupingBy()
+
+<br/>
+
+``` java
+// String 의 문자열 "", escape 생략
+
+// Given
+List<String> jsons = Arrays.asList(
+	{"name":"project1","policy":"public","creator":{"name":"user1","age":30}},
+	{"name":"project2","policy":"private","creator":{"name":"user2","age":40}},
+	{"name":"project3","description":"desc","creator":{"name":"user3","age":50}});
+
+// When
+JsonArray expected = jsons.stream()
+        	.map(json -> Json.createReader(new StringReader(json)))
+            .map(JsonReader::readObject)
+        	.collect(JsonCollectors.groupingBy(
+              jsonValue -> jsonValue.asJsonObject().getString("policy")));
+
+// Then
+assertSame(2, expected.getJsonArray("public").size());
+assertEquals(jsons.get(0), expected.getJsonArray("public").get(0).toString());
+assertEquals(jsons.get(2), expected.getJsonArray("public").get(1).toString());
+assertSame(1, expected.getJsonArray("private").size());
+assertEquals(jsons.get(1), expected.getJsonArray("private").get(0).toString());
+```
+---
+
+class: center, middle
+
+## JSON-B, JSON-P
+
+## Specification 구현체들
+
+<br/>
+
+#### JSON-B, JSON-P 는 명세와 interface 를 제공하며,
+#### 실제 구현 및 동작은 구현체에 의존한다.
+
+---
+
+class: middle
+
+### JSON-P 구현체
+
+<br/>
+
+- `org.glassfish:javax.json:1.1` (Default Provider)
+- `org.apache.johnzon:johnzon-core:1.1.4`
+- `com.owlike.genson:1.4` (JSR-353 only)
+
+* `com.fasterxml.jackson.datatype:jackson-datatype-jsr353:2.9.0`
+    > not implemented, support JSR-353
+
+---
+
+class: middle
+
+### JSON-B 구현체
+
+<br/>
+
+- `org.eclipse:yasson:1.0.1` (Default Provider)
+- `org.apache.johnzon:johnzon-jsonb:1.1.4`
+
+---
+
+class: middle
+
+### Spring Boot 2.0 - M5
+
+<br/>
+
+https://github.com/spring-projects/spring-boot/pull/9648
+
+![jhoeller](./imgs/jhoeller.jpg)
+
+---
+
+class: middle
+
+### Spring Boot 2.0 - JsonbAutoConfiguration
+
+<br/>
+
+- Apache Johnzon 1.1.4
+
+![johnzon](./imgs/johnzon-dependency.jpg)
+
+``` java
+package org.springframework.boot.autoconfigure.jsonb;
+
+@Configuration
+@ConditionalOnClass(Jsonb.class)
+public class JsonbAutoConfiguration {
+
+	@Bean
+	@ConditionalOnMissingBean
+	public Jsonb jsonb() {
+		return JsonbBuilder.create();
+	}
+
+}
+```
+---
+
+class: middle
+
+### Spring Boot 2.0 - JsonbTester
+
+``` java
+@RunWith(SpringRunner.class)
+@JsonTest
+public class SpringBootJsonTests {
+	@Autowired
+	private JsonbTester<User> jsonb;
+
+	private User object;
+	private String json;
+
+	@Before
+	public void setUp() {
+		this.object = new User("user", 30);
+		this.json = "{\"name\" : \"user\", \"age\" : 30 }";
+	}
+
+	@Test
+	public void jasonbSerialize() throws IOException {
+		JsonContent<User> expected = this.jsonb.write(this.object);
+		assertThat(expected).extractingJsonPathStringValue("@.name")
+                .isEqualTo(this.object.getName());
+		assertThat(expected).extractingJsonPathNumberValue("@.age")
+                .isSameAs(this.object.getAge());
+	}
+
+	@Test
+	public void jasonbDeserialize() throws IOException {
+		ObjectContent<User> expected = this.jsonb.parse(this.json);
+		User user = expected.getObject();
+		assertThat(user.getName()).isEqualTo(this.object.getName());
+		assertThat(user.getAge()).isEqualTo(this.object.getAge());
+	}
+}
+```
+
+---
+
+class: middle
+
+### JSON-B, JSON-P 사용시 주의점
+
+<br/>
+
+- `JsonbProvider`, `JsonProvider` 는 static 메소드로 적절한 구현체를 찾는다.
+- `ServiceLoader` 를 사용해 `META-INF.services` 에 명시된 구현체를 사용하기 때문에, 직접 구현체를 지정하는게 좋다.
+- 특히 `Jsonb` 는 `JsonProvider` 에 의존하고 `Jsonb` 구현체 내부에서 필요에 따라 `JsonProvider.provider()` 를 호출한다.
+- `META-INF.services` 에 사용 구현체를 지정해 놓지 않으면, dependency 가 추가되면서 사용되는 구현체가 변경될 수 있다.
+
+
+---
+
+class: middle
+
+### META-INF.services 에 구현체 지정
+
+<br/>
+
+- `/resources/META-INF/services/javax.json.bind.spi.JsonbProvider`
+
+``` java
+org.apache.johnzon.jsonb.JohnzonProvider
+# org.eclipse.yasson.JsonBindingProvider
+```
+
+<br/>
+
+- `/resources/META-INF/services/javax.json.spi.JsonProvider`
+
+``` java
+org.glassfish.json.JsonProviderImpl
+# org.apache.johnzon.core.JsonProviderImpl
+# com.owlike.genson.ext.jsr353.GensonJsonProvider - not supported jsonb
+# com.github.pgelinas.jackson.javax.json.spi.JacksonProvider - not supported jsonb
+```
+
+---
+
+class: middle
+
+### JSON-B and Genson dependency issues
+
+<br/>
+
+- `Genson` 의 경우 라이브러리 내부에서 `META-INF.services` 로 자신의 JsonProvider 구현체를 지정하고 있다.
+- META-INF 에 JsonProvider 구현체를 지정하지 않았다면, `Genson` 의 dependency 가 추가되는 것만으로, JsonProvider 구현체가 `Genson` 으로 변경될 수 있다.
+- `Genson` 은 JSR-374(1.1) 을 구현하지 않았기 때문에, `Jsonb` 에서 processing 중 에러를 만날 수 있다.
+    > UnsupportedOperationException (JSR-374 에서 추가된 default method)
+- JSON-B 를 사용하는 프레임워크에서도 JsonbProvider 에 대해 비슷한 문제 발생 가능
+
+---
+
+class: center, middle
+
+# Q & A
+
+---
+
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js">
+</script>
+<script>
+    var slideshow = remark.create({
+        highlightStyle: 'dark',
+        highlightSpans: true
+    });
+</script>
+</body>
+</html>
