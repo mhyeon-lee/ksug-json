@@ -30,8 +30,8 @@
 class: center, middle
 
 ## Introduce
-#JSON-B, JSON-P, JPA 2.2
-##Specification
+# JPA 2.2, JSON-B,JSON-P
+## Specification
 <br/><br/><br/>
 
 .right[이명현 (Naver Corp)]
@@ -41,11 +41,272 @@ class: center, middle
 
 class: middle
 
-1. [JSR-367] JavaTM API for JSON Binding(JSON-B)
+### JPA 2.2
 
-2. [JSR-374] JavaTM API for JSON Processing(JSON-P)
+1. @Repeatable makred
+2. Java 8 Date and Time types
+3. Stream for query result
+4. AttributeConverters to support CDI injection
 
-3. [JSR-338] JPA 2.2
+<br/>
+
+### JSON-B, JSON-P
+
+1. Json Serialize, Deserialize 개념 원리
+2. JSON-B Specification
+3. What's new in JSON-P
+4. JSON-B, JSON-P 구현체들
+5. Java JSON benchmark
+
+---
+
+class: center, middle
+
+## JPA 2.2 Specification
+
+#### JSR-338 (2017.08)
+
+---
+
+class: middle
+
+## What's new in JPA 2.2s
+
+- @Repeatable makred
+    > https://github.com/javaee/jpa-spec/issues/115
+- Java 8 Date and Time types
+    > https://github.com/javaee/jpa-spec/issues/63
+- Stream for query result
+    > https://github.com/javaee/jpa-spec/issues/99
+- AttributeConverters to support CDI injection
+    > https://github.com/javaee/jpa-spec/issues/109
+
+---
+
+class: middle
+
+### JPA 2.2 @Repeatable makred
+#### javax.persistences
+
+- @AssociationOverride, @AttributeOverride
+- @Convert
+- @JoinColumn, @PrimaryKeyJoinColumn, @MapKeyJoinColumn
+- @NamedQuery, @NamedNativeQuery
+- @NamedEntityGraph, @NamedStoredProcedureQuery
+- @PersistenceContext, @PersistenceUnit
+- @SecondaryTable, @SqlResultSetMapping
+- @SequenceGenerator, @TableGenerator
+
+---
+
+class: middle
+
+### 불필요하게 반복되는 Annotations
+
+``` java
+@Entity
+@NamedQueries({
+  @NamedQuery(name = "Project.findByName", query = "SELECT p FROM Project p WHERE p.name = :name"),
+  @NamedQuery(name = "Project.findByPolicy", query = "SELECT p FROM Project p WHERE p.policy = "policy")
+})
+public class Project {
+  ...
+}
+
+```
+
+<br/>
+
+### @Repeatable
+
+``` java
+@Entity
+@NamedQuery(name = "Project.findByName", query = "SELECT p FROM Project p WHERE p.name = :name"),
+@NamedQuery(name = "Project.findByPolicy", query = "SELECT p FROM Project p WHERE p.policy = "policy")
+public class Project {
+  ...
+}
+```
+
+---
+
+class: middle
+
+## Hinberate 5.2 @Repeatable makred
+#### org.hibernate.annotation package
+
+- @AnyMetaDef
+- @ColumnTransformer
+- @FetchProfile
+- @Filter, @FilterDef, @FilterJoinTable
+- @GenericGenerator
+- @JoinColumnOrFormula
+- @NamedQuery, @NamedNativeQuery
+- @Table
+- @Tuplizer
+- @TypeDef
+
+---
+class: middle
+
+### Java 8 Date and Time types mapping support
+
+<br/>
+
+
+- java.time.LocalDate
+- java.time.LocalTime
+- java.time.LocalDateTime
+- java.time.OffsetTime
+- java.time.OffsetDateTime
+
+<br/>
+
+- java.time.ZonedDateTime 은 time_zone 문제로 보류
+- Hibernate 5.2 에서는 위의 time 및 ZonedDateTime 지원
+- 단, 원하는 시간대 설정을 위해 `hibernate.jdbc.time_zone=UTC` 설정 필요
+
+---
+
+class: middle
+
+### Stream for query result
+
+<br/>
+
+- javax.persistence.Query, javax.persistence.TypedQuery interface
+- Stream 을 반환하는 `getResultStream()` 메소드 추가
+
+<br/>
+
+
+``` java
+default Stream getResultStream() {
+  return getResultList().stream();
+}
+```
+---
+
+class: middle
+
+### Hibernate with stream result
+
+<br/>
+
+- 단순히 List 를 Stream 으로 변환하는 것은 메모리에 List 를 모두 바인딩한 후 메모리에 적재하게 된다.
+- Hibernate 5.2 에서는 org.hibernate.query.Query 인터페이스에 Stream 을 반환하는 `stream()` 메소드가 추가됨
+- `stream()` 메소드에서는 ScrollableResult 를 반환하여, 필요한 결과만 메모리에 적재
+    > org.hibernate.query.internal.AbstractProduceQuery
+- Hinberate 가 JPA 2.2 지원시, `stream()` 메소드로 `getResultStream()` 구현에 활용할 것
+- Spring-Data-Jpa 에서 구현체로 Hinbernate를 사용하면, CrudRepository 에서 Stream 응답으로 `stream()` 메소드 사용한다.
+
+``` java
+@Transactional(readOnly = true)
+public interface IssueRepository extends JpaRepository<Issue, UUID> {
+  @QueryHints(value = @QueryHint(name = HINT_FETCH_SIZE, value = "" + Integer.MIN_VALUE))
+	@Query("select i from Issue i")
+	Stream<Issue> readAll();
+}
+```
+
+---
+
+class: middle
+
+### Stream result 사용시 고려사항
+
+<br/>
+
+- ResultSet.TYPE_FORWARD_ONLY - Hibernate 의 stream() 에서 설정됨
+- ResultSet.CONCUR_READ_ONLY - @Transactional(readOnly=true)
+- Stream 에서 결과를 읽을때도 Transaction Scope 이 유지되어야 한다.
+- 사용하는 DBMS 에 따른 최적화 및 주의사항을 고려해야 한다.
+  > MySQL: stmt.setFetchSize(Integer.MIN_VALUE);
+
+<br/>
+
+- 결과 집합을 최소화하는 연산은 데이터베이스에서 최적화 되어 있다.
+- filter(where), paging(limit, offset), sorting(order by) 등은 java stream 이 아닌 `query` 에서 처리해야 한다.
+- 단, 메모리 적재와 관련된 최적화에 활용할 수 있다. (파일 쓰기, batch 작업 등)
+
+---
+
+class: middle
+
+### Exporting results of large query as a CSV file - PAGING
+
+``` java
+PrintWriter out = response.getWriter();
+int page = 0;
+Page<Issue> issuePage;
+do {
+	issuePage = issueRepository.findAll(new PageRequest(page, PAGE_SIZE));
+	for (Issue issue : issuePage) {
+			String line = issueToCsv(issue.getContent());
+			out.write(line);
+			out.write("\n");
+	}
+	entityManager.clear();
+	page++;
+} while (issuePage.hasNext());
+out.flush();
+```
+
+.center[![page-result](./imgs/page-result.jpg)]
+
+---
+
+class: middle
+
+### Exporting results of large query as a CSV file - STREAM
+
+``` java
+PrintWriter out = response.getWriter();
+Stream<Issue> issueStream = issueRepository.readAll();
+issueStream.forEach(issue -> {
+    String line = issueToCsv(issue);
+    out.write(line);
+    out.write("\n");
+    entityManager.detach(issue);
+});
+out.flush();
+```
+
+.center[![scroll-result](./imgs/scroll-result.jpg)]
+
+---
+
+class: middle
+
+### AttributeConverters to support CDI injection
+
+- CDI 가 enabled 라면, AttributeConverter 에 Context 를 주입할 수 있다.
+- @PostConstruct, @PreDestory 를 지원한다.
+- Spring-Data-Jpa 에서 구현 지원이 필요하다.
+
+``` java
+@Converter(autoApply = false)
+public class MyAttributeConverter implements AttributeConverter<String, String> {
+    @Autowired
+    private Encryptor encryptor;
+
+    @Override
+    public String convertToDatabaseColumn(String obj) {
+        return encryptor.encrypt(obj);
+    }
+
+    @Override
+    public MyObject convertToEntityAttribute(String s) {
+        return encryptor.decrypt(s);
+    }
+}
+```
+
+---
+
+class: center, middle
+
+## JSON-B, JSON-P
 
 ---
 
@@ -713,6 +974,7 @@ class: middle
   - JsonPatch
   - JsonPointer
   - JsonMergePatch
+  - JsonUtil
   - JsonCollectors
 
 ---
@@ -937,7 +1199,7 @@ JsonValue result = jsonMergePatch.apply(target);
 
 System.out.println(result.toString());
 
-{ "bibidi": "buu", "foo": "bar", "satan": null, "hello": ["majin"]}
+{ "bibidi": "buu", "foo": "bar", "hello": ["majin"]}
 ```
 ---
 
@@ -966,16 +1228,12 @@ class: middle
 
 ## JsonPatch, JsonMergePatch
 
-<br/>
-
 ### Pros
 
   - Resource 에 대한 부분 수정이 가능하므로, API 갯수를 줄일 수 있다.
   - 부분 수정이 가능하면서, Version 충돌을 줄일 수 있다.
   - JsonPatch 는 기존 표현하기 어려웠던 동사(op)를 표현할 수 있다.
   - JsonMergePatch 는 이해하기 쉽고 Client 에서 간결하게 사용할 수 있다.
-
-<br/>
 
 ### Cons
 
@@ -984,7 +1242,25 @@ class: middle
   - `JsonMergePatch` 는 null 과 undefined 구분이 필요
   - `JsonMergePatch` 는 nested 속성 patch 를 표현하기 어려운 한계
   - Object의 serialize, deserialize 과정에 binding 설정에 따른 데이터 손실 및 의도하지 않은 변경이 발생할 수 있다.
-  - 도메인 객체 변경에 대한 도메인 로직이 개입하기 어렵다.
+  - 도메인 객체 속성 변경에 대한 도메인 로직이 개입하기 어렵다.
+
+---
+
+class: middle
+
+### JsonUtil.toJson()
+
+<br/>
+
+- JSON String 을 JsonValue 로 변환해주는 메소드
+
+``` java
+String json = {"bibidi": "babidi"};
+JsonValue jsonValue = JsonUtil.toJson(json);
+
+System.out.println(jsonValue.toString());
+{"bibidi": "babidi"};
+```
 
 ---
 
@@ -1021,8 +1297,7 @@ List<String> jsons = Arrays.asList(
 
 // When
 JsonArray expected = jsons.stream()
-        	.map(json -> Json.createReader(new StringReader(json)))
-            .map(JsonReader::readObject)
+        	.map(JsonUtil::toJson)
         	.collect(JsonCollectors.toJsonArray());
 
 // Then
@@ -1076,8 +1351,7 @@ List<String> jsons = Arrays.asList(
 
 // When
 JsonArray expected = jsons.stream()
-        	.map(json -> Json.createReader(new StringReader(json)))
-            .map(JsonReader::readObject)
+        	.map(JsonUtil::toJson)
         	.collect(JsonCollectors.groupingBy(
               jsonValue -> jsonValue.asJsonObject().getString("policy")));
 
@@ -1092,9 +1366,7 @@ assertEquals(jsons.get(1), expected.getJsonArray("private").get(0).toString());
 
 class: center, middle
 
-## JSON-B, JSON-P
-
-## Specification 구현체들
+## JSON-B, JSON-P 구현체들
 
 <br/>
 
@@ -1260,6 +1532,15 @@ class: middle
 - `Genson` 은 JSR-374(1.1) 을 구현하지 않았기 때문에, `Jsonb` 에서 processing 중 에러를 만날 수 있다.
     > UnsupportedOperationException (JSR-374 에서 추가된 default method)
 - JSON-B 를 사용하는 프레임워크에서도 JsonbProvider 에 대해 비슷한 문제 발생 가능
+
+---
+
+class: center, middle
+
+## Java JSON benchmark
+
+- https://github.com/fabienrenaud/java-json-benchmark
+- https://github.com/cowtowncoder/java-json-performance-benchmarks
 
 ---
 
