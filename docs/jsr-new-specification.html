@@ -101,7 +101,7 @@ class: middle
 
 class: middle
 
-### 불필요하게 반복되는 Annotations
+### 불필요하게 묶어놓은 Annotation
 
 ``` java
 @Entity
@@ -165,6 +165,7 @@ class: middle
 - java.time.ZonedDateTime 은 time_zone 문제로 보류
 - Hibernate 5.2 에서는 위의 time 및 ZonedDateTime 지원
 - 단, 원하는 시간대 설정을 위해 `hibernate.jdbc.time_zone=UTC` 설정 필요
+- MySQL: useLegacyDatetimeCode=false
 
 ---
 
