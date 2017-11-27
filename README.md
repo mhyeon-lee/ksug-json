@@ -1,6 +1,6 @@
 ## json sample code for KSUG
 
-- 발표 자료: https://cdn.rawgit.com/mhyeon-lee/ksug-json/f59ab2c0/docs/jsr-new-specification.html
+- 발표 자료: https://cdn.rawgit.com/mhyeon-lee/ksug-json/52e47199/docs/jsr-new-specification.html
 
 #### Sample Test
 
